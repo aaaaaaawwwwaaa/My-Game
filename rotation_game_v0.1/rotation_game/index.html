@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ROTATION — Playtest Build</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">MATHEW'S GAME</div>
+        <h1>ROTATION</h1>
+      </div>
+      <div class="top-actions">
+        <button id="newGameBtn" class="btn">New Match</button>
+        <button id="rulesBtn" class="btn ghost">Rules</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="setupScreen" class="screen active">
+        <div class="hero-panel">
+          <div class="hero-copy">
+            <div class="badge">PLAYTEST BUILD 0.1</div>
+            <h2>A lane-based card battler where every unit is on a clock.</h2>
+            <p>Place units. Rotate through their moves. Break the enemy Kingdom before your own board burns out.</p>
+            <div class="hero-actions">
+              <button id="quickStartBtn" class="btn primary">Quick Start</button>
+              <button id="deckBuilderBtn" class="btn">Deck Builder</button>
+            </div>
+          </div>
+          <div class="hero-card-demo">
+            <div class="card big demo-card">
+              <div class="card-top"><span>Abyssal Overlord</span><span class="hp">12 HP</span></div>
+              <div class="type-row"><span class="type chaos">Chaos</span><span class="type soul">Soul Bound</span><span class="boss-tag">BOSS</span></div>
+              <div class="move-list">
+                <div>1. Echoing Strike <b>2</b></div>
+                <div>2. Hell Flame <b>2</b></div>
+                <div>3. Rage <b>4</b></div>
+                <div>4. <b>GX</b> Kingdom of the Abyss</div>
+              </div>
+              <div class="gx-box">Deal 7 damage to one unit and 5 damage to the enemy Kingdom.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-grid">
+          <div class="panel">
+            <h3>Playtest defaults</h3>
+            <div class="stat-grid">
+              <div><span>Kingdom HP</span><b>100</b></div>
+              <div><span>Lanes</span><b>5</b></div>
+              <div><span>Starting hand</span><b>5</b></div>
+              <div><span>Draw / turn</span><b>2</b></div>
+              <div><span>Deck size</span><b>30</b></div>
+              <div><span>Boss cap</span><b>2</b></div>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Current build</h3>
+            <p>Core lane combat, rotation, Armor, Kingdom Defense, statuses, spells, Boss abilities, GX moves, and a curated playtest card pool are wired in.</p>
+            <p class="muted">This is a rules-first prototype: balance can be tuned without rewriting the engine.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="screen">
+        <div class="game-toolbar">
+          <div class="turn-pill">Turn <span id="turnNumber">1</span> · <span id="activePlayerLabel">Player 1</span> · <span id="phaseLabel">Placing</span></div>
+          <div class="toolbar-actions">
+            <button id="endPlacementBtn" class="btn primary">End Placement</button>
+            <button id="passTurnBtn" class="btn ghost">Pass</button>
+          </div>
+        </div>
+
+        <section class="kingdom enemy" id="p2Kingdom">
+          <div class="kingdom-name">PLAYER 2 KINGDOM</div>
+          <div class="kingdom-meter"><div class="kingdom-fill" id="p2KingdomFill"></div></div>
+          <div class="kingdom-stats"><span><b id="p2Hp">100</b> HP</span><span><b id="p2KDef">0</b> DEF</span><span><b id="p2Deck">30</b> deck</span><span><b id="p2Discard">0</b> discard</span></div>
+        </section>
+
+        <section class="board-wrap">
+          <div class="lane-labels"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <div class="board-row enemy-row" id="p2Board"></div>
+          <div class="centerline"><span>ATTACK LINE</span></div>
+          <div class="board-row" id="p1Board"></div>
+          <div class="lane-labels bottom"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+        </section>
+
+        <section class="kingdom" id="p1Kingdom">
+          <div class="kingdom-name">PLAYER 1 KINGDOM</div>
+          <div class="kingdom-meter"><div class="kingdom-fill" id="p1KingdomFill"></div></div>
+          <div class="kingdom-stats"><span><b id="p1Hp">100</b> HP</span><span><b id="p1KDef">0</b> DEF</span><span><b id="p1Deck">30</b> deck</span><span><b id="p1Discard">0</b> discard</span></div>
+        </section>
+
+        <section class="hand-panel">
+          <div class="hand-head"><h3 id="handTitle">Player 1 Hand</h3><span class="muted">Click a card, then click a lane or valid target.</span></div>
+          <div id="hand" class="hand"></div>
+        </section>
+
+        <section class="log-panel panel">
+          <div class="log-head"><h3>Combat Log</h3><button id="clearLogBtn" class="btn ghost tiny">Clear</button></div>
+          <div id="combatLog" class="combat-log"></div>
+        </section>
+      </section>
+
+      <section id="deckScreen" class="screen">
+        <div class="deck-head">
+          <div><div class="eyebrow">BUILD</div><h2>Deck Builder</h2><p class="muted">30 cards · 2 copies normal · 1 copy per Boss · max 2 Bosses · max 8 Spells · min 20 Units</p></div>
+          <div class="deck-actions"><button id="autoDeckBtn" class="btn">Auto-build</button><button id="saveDeckBtn" class="btn primary">Use Deck</button><button id="backSetupBtn" class="btn ghost">Back</button></div>
+        </div>
+        <div class="deck-layout">
+          <aside class="panel deck-summary">
+            <h3>Selected</h3>
+            <div id="deckCount">0 / 30</div>
+            <div id="deckBreakdown" class="muted"></div>
+            <div id="selectedDeck" class="selected-deck"></div>
+          </aside>
+          <div>
+            <div class="filters panel">
+              <input id="searchCards" placeholder="Search cards..." />
+              <select id="typeFilter"><option value="">All types</option></select>
+              <select id="kindFilter"><option value="">All cards</option><option value="Unit">Units</option><option value="Boss">Bosses</option><option value="Spell">Spells</option></select>
+            </div>
+            <div id="cardLibrary" class="library"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden"><div class="modal-card"><button id="modalClose" class="modal-close">×</button><div id="modalBody"></div></div></div>
+  <script src="cards.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
